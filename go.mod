@@ -60,6 +60,7 @@ require (
 	k8s.io/kubernetes v1.15.4
 	sigs.k8s.io/controller-runtime v0.3.0
 	sigs.k8s.io/controller-tools v0.2.2
+	sigs.k8s.io/kubebuilder v1.0.8
 )
 
 // Pinned to kubernetes-1.15.4
@@ -85,3 +86,6 @@ replace (
 	k8s.io/metrics => k8s.io/metrics v0.0.0-20190918202012-3c1ca76f5bda
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.0.0-20190918201353-5cc279503896
 )
+
+// Pinned to latest on branch "expose-cobra-cli"
+replace sigs.k8s.io/kubebuilder => github.com/hasbro17/kubebuilder v1.0.9-0.20191028062726-7b78227bed5f

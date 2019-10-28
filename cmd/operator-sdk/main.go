@@ -25,7 +25,9 @@ import (
 	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/alpha"
 	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/build"
 	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/completion"
+	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/create"
 	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/generate"
+	cmdinit "github.com/operator-framework/operator-sdk/cmd/operator-sdk/init"
 	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/migrate"
 	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/new"
 	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/olmcatalog"
@@ -75,6 +77,9 @@ func main() {
 	root.AddCommand(test.NewCmd())
 	root.AddCommand(up.NewCmd())
 	root.AddCommand(version.NewCmd())
+
+	root.AddCommand(cmdinit.NewCmd())
+	root.AddCommand(create.NewCmd())
 
 	root.PersistentFlags().Bool(flags.VerboseOpt, false, "Enable verbose logging")
 	if err := viper.BindPFlags(root.PersistentFlags()); err != nil {
