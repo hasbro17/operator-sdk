@@ -18,6 +18,7 @@
 - Added [`bundle create`](./doc/cli/operator-sdk_bundle_create.md) which builds, and optionally generates metadata for, [operator bundle images](https://github.com/openshift/enhancements/blob/ec2cf96/enhancements/olm/operator-registry.md). ([#2076](https://github.com/operator-framework/operator-sdk/pull/2076), [#2438](https://github.com/operator-framework/operator-sdk/pull/2438))
 - Added [`bundle validate`](./doc/cli/operator-sdk_bundle_validate.md) which validates [operator bundle images](https://github.com/openshift/enhancements/blob/ec2cf96/enhancements/olm/operator-registry.md). ([#2411](https://github.com/operator-framework/operator-sdk/pull/2411))
 - Added `blacklist` field to the `watches.yaml` for Ansible based operators. Blacklisted secondary resources will not be watched or cached.([#2374](https://github.com/operator-framework/operator-sdk/pull/2374))
+- Added the [`generate csv --include`](doc/cli/operator-sdk_generate_csv.md#options) option to include files as input to the CSV generator in lieu of a config. ([#2249](https://github.com/operator-framework/operator-sdk/pull/2249))
 
 ### Changed
 
@@ -31,6 +32,8 @@
 ### Deprecated
 
 ### Removed
+
+- **Breaking Change:** Removed CSV configuration file support in favor of including files as input to the generator using [`generate csv --include`](doc/cli/operator-sdk_generate_csv.md#options), defaulting to the `deploy/` directory. ([#2249](https://github.com/operator-framework/operator-sdk/pull/2249))
 
 ### Bug Fixes
 

@@ -18,7 +18,7 @@ import (
 	"errors"
 	"path/filepath"
 
-	olmcatalog "github.com/operator-framework/operator-sdk/internal/generate/olm-catalog"
+	gencatalog "github.com/operator-framework/operator-sdk/internal/generate/olm-catalog"
 	olmoperator "github.com/operator-framework/operator-sdk/internal/olm/operator"
 	"github.com/operator-framework/operator-sdk/internal/util/projutil"
 
@@ -63,7 +63,7 @@ func NewCmd() *cobra.Command {
 				c.olmArgs.OperatorNamespace = c.namespace
 				if c.olmArgs.ManifestsDir == "" {
 					operatorName := filepath.Base(projutil.MustGetwd())
-					c.olmArgs.ManifestsDir = filepath.Join(olmcatalog.OLMCatalogDir, operatorName)
+					c.olmArgs.ManifestsDir = filepath.Join(gencatalog.OLMCatalogDir, operatorName)
 				}
 				if err := c.olmArgs.Cleanup(); err != nil {
 					log.Fatalf("Failed to clean up operator using OLM: %v", err)

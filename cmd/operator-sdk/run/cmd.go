@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	gencatalog "github.com/operator-framework/operator-sdk/internal/generate/olm-catalog"
 	olmoperator "github.com/operator-framework/operator-sdk/internal/olm/operator"
-	olmcatalog "github.com/operator-framework/operator-sdk/internal/scaffold/olm-catalog"
 	k8sinternal "github.com/operator-framework/operator-sdk/internal/util/k8sutil"
 	"github.com/operator-framework/operator-sdk/internal/util/projutil"
 	aoflags "github.com/operator-framework/operator-sdk/pkg/ansible/flags"
@@ -68,7 +68,7 @@ func NewCmd() *cobra.Command {
 				c.olmArgs.OperatorNamespace = c.namespace
 				if c.olmArgs.ManifestsDir == "" {
 					operatorName := filepath.Base(projutil.MustGetwd())
-					c.olmArgs.ManifestsDir = filepath.Join(olmcatalog.OLMCatalogDir, operatorName)
+					c.olmArgs.ManifestsDir = filepath.Join(gencatalog.OLMCatalogDir, operatorName)
 				}
 				if err := c.olmArgs.Run(); err != nil {
 					log.Fatalf("Failed to run operator using OLM: %v", err)

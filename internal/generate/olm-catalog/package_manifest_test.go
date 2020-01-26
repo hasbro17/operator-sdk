@@ -18,21 +18,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/operator-framework/operator-registry/pkg/registry"
-
 	gen "github.com/operator-framework/operator-sdk/internal/generate/gen"
 
+	"github.com/operator-framework/operator-registry/pkg/registry"
 	"github.com/stretchr/testify/assert"
-)
-
-const (
-	testProjectName = "memcached-operator"
-	csvVersion      = "0.0.3"
-)
-
-var (
-	testDataDir   = filepath.Join("..", "testdata")
-	testGoDataDir = filepath.Join(testDataDir, "go")
 )
 
 // newTestPackageManifestGenerator returns a package manifest Generator populated with test values.
@@ -48,12 +37,14 @@ func newTestPackageManifestGenerator() gen.Generator {
 
 func TestGeneratePackageManifest(t *testing.T) {
 	g := newTestPackageManifestGenerator()
-	fileMap, err := g.(pkgGenerator).generate()
+	pg := g.(pkgGenerator)
+
+	fileMap, err := pg.generate()
 	if err != nil {
 		t.Fatalf("Failed to execute package manifest generator: %v", err)
 	}
 
-	if b, ok := fileMap[g.(pkgGenerator).fileName]; !ok {
+	if b, ok := fileMap[pg.fileName]; !ok {
 		t.Error("Failed to generate package manifest")
 	} else {
 		assert.Equal(t, packageManifestExp, string(b))
@@ -62,14 +53,15 @@ func TestGeneratePackageManifest(t *testing.T) {
 
 func TestValidatePackageManifest(t *testing.T) {
 	g := newTestPackageManifestGenerator()
+	pg := g.(pkgGenerator)
 
 	// pkg is a basic, valid package manifest.
-	pkg, err := g.(pkgGenerator).buildPackageManifest()
+	pkg, err := pg.buildPackageManifest()
 	if err != nil {
 		t.Fatalf("Failed to execute package manifest generator: %v", err)
 	}
 
-	g.(pkgGenerator).setChannels(&pkg)
+	pg.setChannels(&pkg)
 	sortChannelsByName(&pkg)
 
 	// invalid mock data, pkg with empty channel
@@ -105,7 +97,8 @@ func TestValidatePackageManifest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := validatePackageManifest(tt.args.pkg); (err != nil) != tt.wantErr {
+			err := validatePackageManifest(tt.args.pkg)
+			if (err != nil) != tt.wantErr {
 				t.Errorf("Failed to check package manifest validate: error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

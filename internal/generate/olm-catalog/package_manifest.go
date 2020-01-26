@@ -63,11 +63,18 @@ func NewPackageManifest(cfg gen.Config, csvVersion, channel string, isDefault bo
 	if g.Inputs == nil {
 		g.Inputs = map[string]string{}
 	}
+	// The olm-catalog directory location depends on where the deploy (operator
+	// manifests) directory is.
+	olmCatalogDir := OLMCatalogDir
+	if deployDir, ok := g.Inputs[DeployDirKey]; ok && deployDir != "" {
+		// Set to non-standard location.
+		olmCatalogDir = filepath.Join(g.Inputs[DeployDirKey], olmCatalogChildDir)
+	}
 	if manifests, ok := g.Inputs[ManifestsDirKey]; !ok || manifests == "" {
-		g.Inputs[ManifestsDirKey] = filepath.Join(OLMCatalogDir, g.OperatorName)
+		g.Inputs[ManifestsDirKey] = filepath.Join(olmCatalogDir, g.OperatorName)
 	}
 	if g.OutputDir == "" {
-		g.OutputDir = filepath.Join(OLMCatalogDir, g.OperatorName)
+		g.OutputDir = filepath.Join(olmCatalogDir, g.OperatorName)
 	}
 	return g
 }
@@ -109,8 +116,7 @@ func (g pkgGenerator) generate() (map[string][]byte, error) {
 	sortChannelsByName(&pkg)
 
 	if err := validatePackageManifest(&pkg); err != nil {
-		log.Error(err)
-		os.Exit(1)
+		return nil, err
 	}
 
 	b, err := yaml.Marshal(pkg)

@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	catalog "github.com/operator-framework/operator-sdk/internal/scaffold/olm-catalog"
+	gencatalog "github.com/operator-framework/operator-sdk/internal/generate/olm-catalog"
 	"github.com/operator-framework/operator-sdk/internal/util/projutil"
 
 	"github.com/operator-framework/operator-registry/pkg/lib/bundle"
@@ -108,8 +108,8 @@ $ operator-sdk bundle create \
 	// Set up default values.
 	projectName := filepath.Base(projutil.MustGetwd())
 	defaultDir := ""
-	if _, err := os.Stat(catalog.OLMCatalogDir); err == nil || os.IsExist(err) {
-		defaultDir = filepath.Join(catalog.OLMCatalogDir, projectName)
+	if _, err := os.Stat(gencatalog.OLMCatalogDir); err == nil || os.IsExist(err) {
+		defaultDir = filepath.Join(gencatalog.OLMCatalogDir, projectName)
 	}
 	defaultChannels := []string{"stable"}
 

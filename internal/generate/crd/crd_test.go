@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	gen "github.com/operator-framework/operator-sdk/internal/generate/gen"
+	"github.com/operator-framework/operator-sdk/internal/generate/gen"
 	"github.com/operator-framework/operator-sdk/internal/scaffold"
 
 	"github.com/stretchr/testify/assert"
