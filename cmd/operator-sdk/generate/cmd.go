@@ -29,7 +29,7 @@ code or manifests on disk.`,
 		newGenerateK8SCmd(),
 		newGenerateCRDsCmd(),
 		newGenerateOpenAPICmd(),
-		newGenerateCSVCmd(),
+		NewGenerateCSVCmd(NewCSVCmdConfig()),
 	)
 	return cmd
 }

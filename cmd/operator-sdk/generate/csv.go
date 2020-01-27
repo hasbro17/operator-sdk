@@ -23,6 +23,7 @@ import (
 
 	"github.com/operator-framework/operator-sdk/internal/generate/gen"
 	gencatalog "github.com/operator-framework/operator-sdk/internal/generate/olm-catalog"
+
 	"github.com/operator-framework/operator-sdk/internal/scaffold"
 	"github.com/operator-framework/operator-sdk/internal/util/fileutil"
 	"github.com/operator-framework/operator-sdk/internal/util/k8sutil"
@@ -33,6 +34,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// CSVCmdConfig allows changing some defaults used by the csvCMD
+// This is to share the csvCmd between `operator-sdk generate csv`
+// and `operator-sdk alpha kubebuilder generate csv`
+type CSVCmdConfig struct {
+	// IncludePaths is the default value used for the --include-paths flag
+	// This is the path where generate csv reads input manifests from e.g ./deploy or ./config
+	IncludePaths []string
+	// DeployDirPath is the project relative path of the Deploy directory
+	// e.g "deploy" in SDK or "config" in Kubebuilder
+	DeployDirPath string
+	// APIsDirPath is the project relative path of the API types directory
+	// e.g "pkg/apis" in SDK or "apis" in Kubebuilder
+	APIsDirPath string
+}
+
+// NewCSVCmdConfig returns a CSVCmdConfig with a default config suited to an SDK project layout
+func NewCSVCmdConfig() *CSVCmdConfig {
+	return &CSVCmdConfig{
+		IncludePaths:  []string{scaffold.DeployDir},
+		DeployDirPath: scaffold.DeployDir,
+		APIsDirPath:   scaffold.ApisDir,
+	}
+}
+
 type csvCmd struct {
 	csvVersion     string
 	csvChannel     string
@@ -41,9 +66,11 @@ type csvCmd struct {
 	includePaths   []string
 	updateCRDs     bool
 	defaultChannel bool
+	deployDirPath  string
+	apisDirPath    string
 }
 
-func newGenerateCSVCmd() *cobra.Command {
+func NewGenerateCSVCmd(cmdConfig *CSVCmdConfig) *cobra.Command {
 	c := &csvCmd{}
 	cmd := &cobra.Command{
 		Use:   "csv",
@@ -57,7 +84,8 @@ version to --from-version. Otherwise the SDK will scaffold a new CSV manifest.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// The CSV generator assumes that the deploy and pkg directories are
 			// present at runtime, so this command must be run in a project's root.
-			projutil.MustInProjectRoot()
+			// TODO (hasbro17): Update CheckProjectRoot() to allow Kubebuilder's project root.
+			// projutil.MustInProjectRoot()
 
 			if len(args) != 0 {
 				return fmt.Errorf("command %s doesn't accept any arguments", cmd.CommandPath())
@@ -79,7 +107,7 @@ version to --from-version. Otherwise the SDK will scaffold a new CSV manifest.`,
 	}
 	cmd.Flags().StringVar(&c.fromVersion, "from-version", "",
 		"Semantic version of an existing CSV to use as a base")
-	cmd.Flags().StringSliceVar(&c.includePaths, "include", []string{scaffold.DeployDir},
+	cmd.Flags().StringSliceVar(&c.includePaths, "include", cmdConfig.IncludePaths,
 		"Paths to include in CSV generation, ex. \"deploy/prod,deploy/test\". "+
 			"If this flag is set and you want to enable default behavior, "+
 			"you must include \"deploy/\" in the argument list")
@@ -93,6 +121,10 @@ version to --from-version. Otherwise the SDK will scaffold a new CSV manifest.`,
 		"Use the channel passed to --csv-channel as the package manifests' default channel. "+
 			"Only valid when --csv-channel is set")
 
+	// Could be flags but only really set by kubebuilder cmds right now
+	c.deployDirPath = cmdConfig.DeployDirPath
+	c.apisDirPath = cmdConfig.APIsDirPath
+
 	return cmd
 }
 
@@ -103,9 +135,16 @@ func (c csvCmd) run() error {
 	if c.operatorName == "" {
 		c.operatorName = filepath.Base(projutil.MustGetwd())
 	}
+
+	// Configure the generator inputs paths for the Deploy and APIs directories
+	inputs := make(map[string]string)
+	inputs[gencatalog.DeployDirKey] = c.deployDirPath
+	inputs[gencatalog.APIsDirKey] = c.apisDirPath
+
 	cfg := gen.Config{
 		OperatorName: c.operatorName,
 		Filters:      gen.MakeFilters(c.includePaths...),
+		Inputs:       inputs,
 	}
 
 	csv := gencatalog.NewCSV(cfg, c.csvVersion, c.fromVersion)
@@ -123,6 +162,8 @@ func (c csvCmd) run() error {
 		if err != nil {
 			return err
 		}
+		// TODO(hasbro17): OLMCatalogDir needs to be configurable
+		// to change the root dir from "deploy/" to "config/"
 		bundleDir := filepath.Join(gencatalog.OLMCatalogDir, strings.ToLower(c.operatorName), c.csvVersion)
 		for name, b := range crdManifestSet {
 			path := filepath.Join(bundleDir, name)

@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/generate"
+	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/alpha/kubebuilder/generate"
 	"github.com/operator-framework/operator-sdk/internal/util/projutil"
 
 	"github.com/google/shlex"
@@ -37,8 +37,8 @@ subcommands until a plugin system is available to integrate the Kubebuilder CLI.
 See: https://github.com/kubernetes-sigs/kubebuilder/pull/1250
 and https://github.com/operator-framework/operator-sdk/blob/master/doc/proposals/openshift-4.4/kubebuilder-integration.md
 `,
-		RunE:   runKubebuilder,
-		Hidden: true,
+		RunE: runKubebuilder,
+		// Hidden: true,
 
 		Example: `
 	# Initialize your project

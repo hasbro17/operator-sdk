@@ -15,8 +15,15 @@
 package generate
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	"github.com/operator-framework/operator-sdk/cmd/operator-sdk/generate"
+)
+
+// Directory names in Kubebuilder's project layout
+const (
+	configDir = "config"
+	apisDir   = "api"
 )
 
 func NewCmd() *cobra.Command {
@@ -25,10 +32,14 @@ func NewCmd() *cobra.Command {
 		Short: "Invokes a generate command",
 		Long: `The operator-sdk generate command invokes a command to perform certain code-
 and manifest-generation tasks.`,
-		Run: func(cmd *cobra.Command, args []string) {
-			log.Info("TODO")
-		},
 	}
-	// cmd.AddCommand(newGenerateCSVCmd())
+	cmd.AddCommand(
+		// Reuse the existing `generate csv` cmd after configuring it for the kubebuilder layout
+		generate.NewGenerateCSVCmd(&generate.CSVCmdConfig{
+			IncludePaths:  []string{configDir},
+			DeployDirPath: configDir,
+			APIsDirPath:   apisDir,
+		}),
+	)
 	return cmd
 }
