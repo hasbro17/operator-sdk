@@ -1,0 +1,7 @@
+domain: example.com
+repo: github.com/hasbro17/memcached-operator
+resources:
+- group: cache
+  kind: Memcached
+  version: v1alpha1
+version: "2"
