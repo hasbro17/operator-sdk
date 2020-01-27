@@ -1,0 +1,222 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "cache.example.com/v1alpha1",
+          "kind": "Memcached",
+          "metadata": {
+            "name": "memcached-sample"
+          },
+          "spec": {
+            "foo": "bar"
+          }
+        }
+      ]
+    capabilities: Basic Install
+  name: memcached-operator.v0.0.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - kind: Memcached
+      name: memcacheds.cache.example.com
+      version: v1alpha1
+  displayName: Memcached Operator
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - cache.example.com
+          resources:
+          - memcacheds
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - cache.example.com
+          resources:
+          - memcacheds/status
+          verbs:
+          - get
+          - patch
+          - update
+        serviceAccountName: memcached-editor-role
+      - rules:
+        - apiGroups:
+          - cache.example.com
+          resources:
+          - memcacheds
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - cache.example.com
+          resources:
+          - memcacheds/status
+          verbs:
+          - get
+        serviceAccountName: memcached-viewer-role
+      - rules:
+        - apiGroups:
+          - cache.example.com
+          resources:
+          - memcacheds
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - cache.example.com
+          resources:
+          - memcacheds/status
+          verbs:
+          - get
+          - patch
+          - update
+        serviceAccountName: manager-role
+      - rules:
+        - apiGroups:
+          - authentication.k8s.io
+          resources:
+          - tokenreviews
+          verbs:
+          - create
+        - apiGroups:
+          - authorization.k8s.io
+          resources:
+          - subjectaccessreviews
+          verbs:
+          - create
+        serviceAccountName: proxy-role
+      deployments:
+      - name: controller-manager
+        spec:
+          selector: null
+          strategy: {}
+          template:
+            metadata: {}
+            spec:
+              containers:
+              - args:
+                - --secure-listen-address=0.0.0.0:8443
+                - --upstream=http://127.0.0.1:8080/
+                - --logtostderr=true
+                - --v=10
+                image: gcr.io/kubebuilder/kube-rbac-proxy:v0.4.1
+                name: kube-rbac-proxy
+                ports:
+                - containerPort: 8443
+                  name: https
+                resources: {}
+              - args:
+                - --metrics-addr=127.0.0.1:8080
+                - --enable-leader-election
+                name: manager
+                resources: {}
+      - name: controller-manager
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              control-plane: controller-manager
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                control-plane: controller-manager
+            spec:
+              containers:
+              - args:
+                - --enable-leader-election
+                command:
+                - /manager
+                image: controller:latest
+                name: manager
+                resources:
+                  limits:
+                    cpu: 100m
+                    memory: 30Mi
+                  requests:
+                    cpu: 100m
+                    memory: 20Mi
+              terminationGracePeriodSeconds: 10
+      - name: controller-manager
+        spec:
+          selector: null
+          strategy: {}
+          template:
+            metadata: {}
+            spec:
+              containers:
+              - name: manager
+                ports:
+                - containerPort: 9443
+                  name: webhook-server
+                  protocol: TCP
+                resources: {}
+                volumeMounts:
+                - mountPath: /tmp/k8s-webhook-server/serving-certs
+                  name: cert
+                  readOnly: true
+              volumes:
+              - name: cert
+                secret:
+                  defaultMode: 420
+                  secretName: webhook-server-cert
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps
+          verbs:
+          - get
+          - list
+          - watch
+          - create
+          - update
+          - patch
+          - delete
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps/status
+          verbs:
+          - get
+          - update
+          - patch
+        - apiGroups:
+          - ""
+          resources:
+          - events
+          verbs:
+          - create
+        serviceAccountName: leader-election-role
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  maturity: alpha
+  provider: {}
+  version: 0.0.1
