@@ -5,12 +5,15 @@
 - Add a new option to set the minimum log level that triggers stack trace generation in logs (`--zap-stacktrace-level`) ([#2319](https://github.com/operator-framework/operator-sdk/pull/2319))
 - Added `pkg/status` with several new types and interfaces that can be used in `Status` structs to simplify handling of [status conditions](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties). ([#1143](https://github.com/operator-framework/operator-sdk/pull/1143))
 - Added support for relative Ansible roles and playbooks paths in the Ansible operator's file. ([#2273](https://github.com/operator-framework/operator-sdk/pull/2273))
+- Added the [`generate csv --include`](doc/cli/operator-sdk_generate_csv.md#options) option to include files as input to the CSV generator in lieu of a config. ([#2249](https://github.com/operator-framework/operator-sdk/pull/2249))
 
 ### Changed
 
 ### Deprecated
 
 ### Removed
+
+- **Breaking Change:** Removed CSV configuration file support (defaulting to deploy/olm-catalog/csv-config.yaml) in favor of including files as input to the generator using [`generate csv --include`](doc/cli/operator-sdk_generate_csv.md#options), defaulting to the `deploy/` directory. ([#2249](https://github.com/operator-framework/operator-sdk/pull/2249))
 
 ### Bug Fixes
 
